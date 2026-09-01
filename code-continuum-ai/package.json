@@ -1,0 +1,15 @@
+{
+  "name": "code-continuum-ai-root",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Code Continuum AI Workspace Monorepo Root",
+  "scripts": {
+    "web:dev": "cd apps/web && npm run dev",
+    "web:build": "cd apps/web && npm run build",
+    "web:test": "cd apps/web && npm run test"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
+}
