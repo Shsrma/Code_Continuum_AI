@@ -7,7 +7,14 @@ from app.core.exceptions import AppException
 from app.api.v1.router import api_v1_router
 from app.api.v1.health import get_health
 
+from app.db.base import Base
+from app.db.session import engine
+from app.models import User, Organization, OrganizationMember
+
 setup_logging()
+
+# Initialize DB tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,

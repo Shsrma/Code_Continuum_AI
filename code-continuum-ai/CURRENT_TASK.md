@@ -1,32 +1,33 @@
-# Current Task: Phase 1 — Project Foundation (Completed)
+# Current Task: Phase 2 — Authentication & User Management (Completed)
 
 ## Task Metadata
-- **Task ID**: PHASE-01-FOUNDATION
-- **Objective**: Establish the core repository structure, operational AI control layer, backend FastAPI application, frontend React/TypeScript/Vite application, database configuration, environment configuration, healthcheck endpoint, frontend-to-backend communication, and baseline unit tests.
+- **Task ID**: PHASE-02-AUTH
+- **Objective**: Implement user database models, password hashing, JWT token authentication, user registration and login API endpoints, protected route dependency middleware, and frontend login/register UI for **Code Continuum AI**.
 - **Status**: **COMPLETED** (2026-09-01)
 
 ---
 
 ## Completed Verification Checklist
-- [x] Correct directory structure created.
-- [x] All 24 documents under `docs/` preserved intact.
-- [x] 8 operational AI control files created and populated.
-- [x] Backend FastAPI application initializes cleanly.
-- [x] Frontend React/Vite/TS app initializes and builds cleanly (`npm run build` verified).
-- [x] Database connection works (SQLite fallback for local tests, PostgreSQL ready).
-- [x] `GET /api/v1/health` returns status 200 with system metadata.
-- [x] Frontend communicates with backend health endpoint.
-- [x] Automated pytest test passes (3/3 passed).
-- [x] README contains startup instructions.
-- [x] No secrets committed.
+- [x] User, Organization, and OrganizationMember SQLAlchemy models created.
+- [x] Password hashing (`pbkdf2_sha256` / `bcrypt`) and JWT token creation/decoding implemented.
+- [x] `POST /api/v1/auth/register` implemented & tested.
+- [x] `POST /api/v1/auth/login` implemented & tested.
+- [x] `GET /api/v1/auth/me` protected endpoint implemented & tested.
+- [x] `get_current_user` auth dependency enforcing Bearer tokens implemented.
+- [x] All 9 backend Pytest unit tests pass cleanly (100% pass rate).
+- [x] Frontend `AuthContext`, `AuthModal` login/register UI, and header profile integration built & compiled cleanly (`npm run build` verified).
 
 ---
 
 ## Next Task
-**PHASE 2 — AUTHENTICATION & USER MANAGEMENT**
-- Implement User & Organization database models in `services/api/app/models/`.
-- Implement Pydantic request/response schemas in `services/api/app/schemas/auth.py` and `user.py`.
-- Implement Argon2id / bcrypt password hashing in `services/api/app/core/security.py`.
-- Implement JWT access token creation & verification.
-- Implement auth routes: `POST /api/v1/auth/register`, `POST /api/v1/auth/login`, `GET /api/v1/auth/me`.
-- Implement auth middleware / dependency for protected routes.
+**PHASE 3 — PROJECT MANAGEMENT**
+- Implement `Project` and `Repository` SQLAlchemy database models in `services/api/app/models/project.py`.
+- Implement Pydantic schemas in `services/api/app/schemas/project.py`.
+- Implement Project service layer & repository layer (`services/api/app/services/project_service.py`).
+- Implement Project API endpoints:
+  - `POST /api/v1/projects` (Create project)
+  - `GET /api/v1/projects` (List user projects)
+  - `GET /api/v1/projects/{projectId}` (Get project details & health score)
+  - `DELETE /api/v1/projects/{projectId}` (Delete project)
+- Implement Frontend Projects view & Create Project Modal in `apps/web/src/features/projects/`.
+- Add Pytest unit tests in `services/api/tests/test_projects.py`.
