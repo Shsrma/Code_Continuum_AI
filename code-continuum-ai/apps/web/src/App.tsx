@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { fetchHealthStatus, HealthStatus } from './services/api';
 import { useAuth } from './context/AuthContext';
 import { AuthModal } from './components/auth/AuthModal';
+import { ProjectsView } from './components/projects/ProjectsView';
 import { 
   Activity, 
   Database, 
@@ -18,25 +19,22 @@ import {
   Server,
   LogIn,
   LogOut,
-  User as UserIcon
+  Construction
 } from 'lucide-react';
 
 export function App() {
   const { user, isAuthenticated, logout } = useAuth();
   const [health, setHealth] = useState<HealthStatus | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [backendError, setBackendError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
 
   const checkHealth = async () => {
     setLoading(true);
-    setBackendError(null);
     const res = await fetchHealthStatus();
     if (res.success && res.data) {
       setHealth(res.data);
     } else {
-      setBackendError(res.error?.message || 'Failed to fetch backend health status');
       setHealth({
         status: 'offline',
         service: 'Code Continuum AI API',
@@ -161,120 +159,94 @@ export function App() {
 
         {/* Dashboard Content */}
         <main className="flex-1 p-8 space-y-8 overflow-y-auto">
-          {/* Welcome Banner */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900/90 to-cyan-950/40 p-6 border border-slate-800 shadow-xl">
-            <div className="relative z-10 space-y-2">
-              <h2 className="text-2xl font-bold text-white tracking-tight">
-                {isAuthenticated ? `Welcome back, ${user?.display_name}` : 'Phase 2 Authentication Ready'}
-              </h2>
-              <p className="text-slate-300 max-w-2xl text-sm leading-relaxed">
-                {isAuthenticated 
-                  ? `Authenticated session active as ${user?.email}. User identity and JWT authentication validated.`
-                  : 'Phase 2 complete. Secure user identity, Argon2id/pbkdf2 password hashing, JWT Bearer token authentication, and protected routes enabled.'}
-              </p>
-            </div>
-            <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-10 pointer-events-none">
-              <Terminal className="h-48 w-48 text-cyan-400" />
-            </div>
-          </div>
 
-          {/* System Metrics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="glass-card rounded-xl p-5 space-y-3">
-              <div className="flex items-center justify-between text-slate-400">
-                <span className="text-xs font-semibold uppercase tracking-wider">System Status</span>
-                <Activity className="h-4 w-4 text-cyan-400" />
-              </div>
-              <div className="text-2xl font-bold text-white capitalize">
-                {health?.status || 'Unknown'}
-              </div>
-              <p className="text-xs text-slate-400 font-mono">
-                {health?.service || 'Code Continuum AI API'}
-              </p>
-            </div>
-
-            <div className="glass-card rounded-xl p-5 space-y-3">
-              <div className="flex items-center justify-between text-slate-400">
-                <span className="text-xs font-semibold uppercase tracking-wider">Authentication</span>
-                <ShieldCheck className="h-4 w-4 text-emerald-400" />
-              </div>
-              <div className="text-2xl font-bold text-white">
-                {isAuthenticated ? 'Active JWT' : 'Guest'}
-              </div>
-              <p className="text-xs text-slate-400 font-mono">
-                {isAuthenticated ? user?.email : 'Sign in to access projects'}
-              </p>
-            </div>
-
-            <div className="glass-card rounded-xl p-5 space-y-3">
-              <div className="flex items-center justify-between text-slate-400">
-                <span className="text-xs font-semibold uppercase tracking-wider">API Version</span>
-                <Server className="h-4 w-4 text-blue-400" />
-              </div>
-              <div className="text-2xl font-bold text-white font-mono">
-                {health?.version || 'v0.1.0'}
-              </div>
-              <p className="text-xs text-slate-400">
-                Environment: <span className="font-mono text-slate-300">{health?.environment || 'dev'}</span>
-              </p>
-            </div>
-
-            <div className="glass-card rounded-xl p-5 space-y-3">
-              <div className="flex items-center justify-between text-slate-400">
-                <span className="text-xs font-semibold uppercase tracking-wider">Database Engine</span>
-                <Database className="h-4 w-4 text-purple-400" />
-              </div>
-              <div className="text-2xl font-bold text-white capitalize">
-                {health?.database || 'Connected'}
-              </div>
-              <p className="text-xs text-slate-400">
-                Users & Orgs Tables Active
-              </p>
-            </div>
-          </div>
-
-          {/* Authentication Demonstration Box */}
-          <div className="glass-card rounded-xl p-6 border border-slate-800 space-y-4">
-            <h3 className="text-base font-semibold text-white flex items-center space-x-2">
-              <UserIcon className="h-5 w-5 text-cyan-400" />
-              <span>Authentication System Status</span>
-            </h3>
-
-            {loading ? (
-              <div className="py-6 flex items-center justify-center text-slate-400 text-sm space-x-2">
-                <RefreshCw className="h-4 w-4 animate-spin text-cyan-400" />
-                <span>Pinging backend at /api/v1/health...</span>
-              </div>
-            ) : backendError ? (
-              <div className="p-4 rounded-lg bg-rose-950/40 border border-rose-800/60 text-rose-300 text-sm">
-                <p className="font-semibold">Backend Unreachable:</p>
-                <p className="text-xs mt-1 font-mono">{backendError}</p>
-              </div>
-            ) : isAuthenticated && user ? (
-              <div className="p-4 rounded-lg bg-emerald-950/30 border border-emerald-800/50 space-y-3 text-sm">
-                <div className="flex items-center justify-between">
-                  <span className="text-emerald-400 font-semibold">User Session Authenticated (GET /api/v1/auth/me)</span>
-                  <span className="text-xs font-mono text-emerald-500 bg-emerald-950/80 px-2 py-0.5 rounded">JWT Bearer Token Active</span>
+          {/* ── DASHBOARD TAB ── */}
+          {activeTab === 'dashboard' && (
+            <>
+              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900/90 to-cyan-950/40 p-6 border border-slate-800 shadow-xl">
+                <div className="relative z-10 space-y-2">
+                  <h2 className="text-2xl font-bold text-white tracking-tight">
+                    {isAuthenticated ? `Welcome back, ${user?.display_name}` : 'Code Continuum AI'}
+                  </h2>
+                  <p className="text-slate-300 max-w-2xl text-sm leading-relaxed">
+                    {isAuthenticated
+                      ? `Authenticated as ${user?.email}. Create a project and import a repository to get started.`
+                      : 'An AI-powered software engineering continuity platform. Sign in to create projects and analyze repositories.'}
+                  </p>
                 </div>
-                <div className="text-xs font-mono text-slate-300 bg-slate-950/80 p-3 rounded border border-slate-800 overflow-x-auto">
-                  {JSON.stringify(user, null, 2)}
+                <div className="absolute right-6 top-1/2 -translate-y-1/2 opacity-10 pointer-events-none">
+                  <Terminal className="h-48 w-48 text-cyan-400" />
                 </div>
               </div>
-            ) : (
-              <div className="p-4 rounded-lg bg-slate-900/60 border border-slate-800 flex items-center justify-between text-sm">
-                <div>
-                  <p className="font-semibold text-slate-200">No active session detected.</p>
-                  <p className="text-xs text-slate-400 mt-1">Sign in or register a new user account to demonstrate Phase 2 JWT authentication.</p>
+
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="glass-card rounded-xl p-5 space-y-3">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-semibold uppercase tracking-wider">System Status</span>
+                    <Activity className="h-4 w-4 text-cyan-400" />
+                  </div>
+                  <div className="text-2xl font-bold text-white capitalize">{health?.status || 'Unknown'}</div>
+                  <p className="text-xs text-slate-400 font-mono">{health?.service || 'Code Continuum AI API'}</p>
                 </div>
-                <button
-                  onClick={() => setIsAuthModalOpen(true)}
-                  className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-semibold text-xs rounded-lg transition-colors"
-                >
-                  Sign In / Register
-                </button>
+
+                <div className="glass-card rounded-xl p-5 space-y-3">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-semibold uppercase tracking-wider">Authentication</span>
+                    <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                  </div>
+                  <div className="text-2xl font-bold text-white">{isAuthenticated ? 'Active JWT' : 'Guest'}</div>
+                  <p className="text-xs text-slate-400 font-mono">{isAuthenticated ? user?.email : 'Sign in to access projects'}</p>
+                </div>
+
+                <div className="glass-card rounded-xl p-5 space-y-3">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-semibold uppercase tracking-wider">API Version</span>
+                    <Server className="h-4 w-4 text-blue-400" />
+                  </div>
+                  <div className="text-2xl font-bold text-white font-mono">{health?.version || 'v0.1.0'}</div>
+                  <p className="text-xs text-slate-400">Env: <span className="font-mono text-slate-300">{health?.environment || 'dev'}</span></p>
+                </div>
+
+                <div className="glass-card rounded-xl p-5 space-y-3">
+                  <div className="flex items-center justify-between text-slate-400">
+                    <span className="text-xs font-semibold uppercase tracking-wider">Database</span>
+                    <Database className="h-4 w-4 text-purple-400" />
+                  </div>
+                  <div className="text-2xl font-bold text-white capitalize">{health?.database || 'Connected'}</div>
+                  <p className="text-xs text-slate-400">SQLite (dev) / PostgreSQL (prod)</p>
+                </div>
               </div>
-            )}
-          </div>
+            </>
+          )}
+
+          {/* ── PROJECTS TAB ── */}
+          {activeTab === 'projects' && (
+            <ProjectsView isAuthenticated={isAuthenticated} />
+          )}
+
+          {/* ── UNIMPLEMENTED TABS ── */}
+          {['analysis', 'chat', 'tests', 'documentation', 'continuity'].includes(activeTab) && (
+            <div className="flex flex-col items-center justify-center py-24 space-y-4 text-center">
+              <div className="h-16 w-16 rounded-2xl bg-slate-800 flex items-center justify-center">
+                <Construction className="h-8 w-8 text-amber-400" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white">
+                  {activeTab === 'analysis' && 'Repository Analysis'}
+                  {activeTab === 'chat' && 'AI Code Assistant'}
+                  {activeTab === 'tests' && 'Test Scenario Generator'}
+                  {activeTab === 'documentation' && 'Documentation Generator'}
+                  {activeTab === 'continuity' && 'Continuity Report'}
+                </h3>
+                <p className="text-sm text-amber-400/80 mt-2 font-mono">Coming in next phase — not yet implemented</p>
+                <p className="text-xs text-slate-500 mt-1 max-w-sm">
+                  This feature will be available after Repository Import (Phase E) is complete.
+                  Create a project first using the Projects tab.
+                </p>
+              </div>
+            </div>
+          )}
+
         </main>
       </div>
 
